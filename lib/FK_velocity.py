@@ -1,5 +1,6 @@
 import numpy as np 
 from lib.calcJacobian import calcJacobian
+from math import pi
 
 def FK_velocity(q_in, dq):
     """
@@ -10,8 +11,21 @@ def FK_velocity(q_in, dq):
     """
 
     ## STUDENT CODE GOES HERE
+    J = calcJacobian(q_in)
 
     velocity = np.zeros((6, 1))
+    velocity = J @ np.transpose(dq)
 
+    print("velocity: ", velocity)
 
     return velocity
+
+if __name__ == "__main__":
+
+
+    # matches figure in the handout
+    q = np.array([ 0,    0,        0,  -pi/2,     0,  pi/2, pi/4 ])
+    dq = np.array([ 0,    0,        0,  .5,     0,  0, 0 ])
+    FK_velocity(q, dq)
+
+    

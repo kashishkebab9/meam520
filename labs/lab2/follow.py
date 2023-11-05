@@ -49,6 +49,7 @@ class JacobianDemo():
         x0 = np.array([0.307, 0, 0.487]) # corresponds to neutral position
         xdes = x0 + np.array([rx*sin(fx*t),ry*sin(fy*t),0])
         vdes = np.array([rx*fx*cos(fx*t),ry*fy*cos(fy*t),0])
+
         return xdes, vdes
 
     def ellipse(t,f=1,ry=.15,rz=.15):
@@ -68,13 +69,14 @@ class JacobianDemo():
 
         x0 = np.array([0.307, 0, 0.487]) # corresponds to neutral position
 
-        ## STUDENT CODE GOES HERE
+        # xdes = x0 + np.array([0, ry*np.sin(f*t), rz*np.cos(f*t)])
+        # vdes = np.array([0, ry*f*np.cos(f*t), -rz*f*np.sin(f*t)])
 
-        # TODO: replace these!
-        xdes = JacobianDemo.x0
-        vdes = np.array([0,0,0])
-
-        ## END STUDENT CODE
+        xdes = x0 + np.array([0, ry*sin(f*t), rz*cos(f*t)])
+        vdes = np.array([0, ry*f*cos(f*t), -rz*f*sin(f*t)])
+        # xdes = x0 + np.array([0, 0, ry * np.sin(f * t)])
+        # vdes = np.array([0, 0, ry * f * np.cos(f * t)])
+        print(vdes)
 
         return xdes, vdes
 
@@ -94,8 +96,13 @@ class JacobianDemo():
         ## STUDENT CODE GOES HERE
 
         # TODO: replace these!
-        xdes = JacobianDemo.x0
-        vdes = np.array([0,0,0])
+        # xdes = JacobianDemo.x0
+        # vdes = np.array([0,0,0])
+        x0 = np.array([0.307, 0, 0.487]) # corresponds to neutral position
+        xdes = x0 + np.array([0, 0, L * np.sin(f * t)])
+        vdes = x0 + np.array([0, 0, L * f * np.cos(f * t)])
+        print(vdes)
+        return xdes, vdes
 
         ## END STUDENT CODE
 
@@ -128,13 +135,18 @@ class JacobianDemo():
                 # get desired trajectory position and velocity
                 xdes, vdes = trajectory(t)
 
+
                 # get current end effector position
                 q = state['position']
                 joints, T0e = self.fk.forward(q)
                 x = (T0e[0:3,3])
 
+                x = x.flatten()
+
+
                 # First Order Integrator, Proportional Control with Feed Forward
                 kp = 20
+
                 v = vdes + kp * (xdes - x)
 
                 # Velocity Inverse Kinematics

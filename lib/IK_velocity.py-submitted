@@ -1,0 +1,60 @@
+import numpy as np 
+from lib.calcJacobian import calcJacobian
+
+def IK_velocity(q_in, v_in, omega_in):
+    """
+    :param q_in: 1 x 7 vector corresponding to the robot's current configuration.
+    :param v_in: The desired linear velocity in the world frame. If any element is
+    Nan, then that velocity can be anything
+    :param omega_in: The desired angular velocity in the world frame. If any
+    element is Nan, then that velocity is unconstrained i.e. it can be anything
+    :return:
+    dq - 1 x 7 vector corresponding to the joint velocities. If v_in and omega_in
+         are infeasible, then dq should minimize the least squares error. If v_in
+         and omega_in have multiple solutions, then you should select the solution
+         that minimizes the l2 norm of dq
+    """
+
+    # np_v = np.isnan(v_in)
+    # np_w = np.isnan(omega_in)
+    # v_in[np_v] = 0
+    # omega_in[np_w] = 0
+
+    v_in = v_in.reshape((3,1))
+    omega_in = omega_in.reshape((3,1))
+    velocity = np.vstack((v_in, omega_in))
+    nan_row_indices = np.where(np.isnan(velocity))[0]
+    velocity_ = np.delete(velocity, nan_row_indices, axis=0)
+    dq = np.zeros((1, 7))
+
+    J = calcJacobian(q_in)
+    J_ = np.delete(J, nan_row_indices, axis=0)
+    # J_pi = np.linalg.lstsq(J, np.identity(6), rcond=None)
+    dq, _, _, _ = np.linalg.lstsq(J_, velocity_, rcond=None)
+
+    return dq.reshape(1, 7)
+
+    # epsilon = np.zeros((6, 1))
+    # epsilon[0,0] = v_in[0]
+    # epsilon[1,0] = v_in[1]
+    # epsilon[2,0] = v_in[2]
+    # epsilon[3,0] = omega_in[0]
+    # epsilon[4,0] = omega_in[1]
+    # epsilon[5,0] = omega_in[2]
+    # epsilon.reshape(6,1)
+
+    # dq = J_pi @ epsilon
+
+    # threshold = .69
+
+    # mask = np.abs(dq) > threshold
+    # print(dq)
+    # print(mask)
+
+    # if True in mask:
+    #     scaling_factor = threshold/dq.max()
+    #     dq = dq * scaling_factor
+    # print(dq)
+
+    # return dq.flatten()
+
